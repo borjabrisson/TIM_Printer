@@ -61,7 +61,7 @@ public:
 	virtual ~conectorSerial();
 
 	int Kbhit_Port();
-	HANDLE Open_Port(string COMx);
+	HANDLE Open_Port(string COMx="/dev/ttyUSB0");
 
 	DCB Get_Configure_Port();
 	DCB Configure_Port(unsigned int BaudRate, char CharParity[]);

@@ -77,7 +77,7 @@ protected: // Ejecución de comandos.
 	int StrToInt(string id);
 	bool checkCRC(string msg);	
 	
-	string calculateCRC(string command);
+
 	string StrToDbHex(string text);
 	
 	void runListener();
@@ -90,11 +90,14 @@ public:
 	virtual ~TimPrinter();
 	
 	bool sendMessage(string msg);
+	string calculateCRC(string command);
 	
 
-	void writeCard(string encode, string text);
+	void writeCard(string source,string encode, string text);
 	void Open(string port="/dev/ttyUSB0");
 	
+	void ejectCard();
+
 	void launchListener();
 
 	void Close();

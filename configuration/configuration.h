@@ -29,6 +29,13 @@ inline void push_Debug(string msg){
 
 typedef map<string,string> field_type;
 
+#define ExCode (string)"1"
+#define DstCode (string)"9"
+#define Track (string)"2"
+#define WrCode (string)"1"
+#define PrintCode (string)"2"
+#define AnyWhere (string)"8"
+
 #define PORT_TCP 5005
 #define HOST_IP "127.0.0.1"
 

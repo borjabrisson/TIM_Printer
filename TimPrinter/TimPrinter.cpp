@@ -92,9 +92,9 @@ string TimPrinter::calculateCRC(string command) {
 	int size = command.size(), amount = 0;
 	string out;
 	for (int i = 0; i < size; i++) {
-		amount += (int) command[i];
+		amount = amount ^ (int) command[i];
 	}
-	amount = amount % 256;
+	//amount = amount % 256;
 	out  = (char)amount;
 	return out;
 }
@@ -116,29 +116,45 @@ bool TimPrinter::sendMessage(string msg){
 	return true;
 }
 
+void TimPrinter::writeCard(string source,string encode, string text){
+	string block = ExCode,number,codeBlock,textBlock,segment;
+//	Ex1 S? D9 T2 R? W1 P2
+	block += source+DstCode+Track+(string)"1";
 
-void TimPrinter::writeCard(string encode, string text){
-	string block = "1",number,segment;
-	block += (string)"3"+(string)"1"+(string)"1"+(string)"1"+(string)"1"+(string)"1";
-	number = (char)(encode.size()+ 0x20);
-	segment= (string)"5"+(string)"2"+number+encode;
-	block+=segment;
-
-	if (text != ""){
-		number = (char)(text.size()+ 0x20);
-		segment="6"+number+text;
-		block+=segment;
+	if (encode !=""){
+		block +=WrCode;			number = (char)(encode.size()+ 0x20);
+		codeBlock= (string)"4"+Track+number+encode;
 	}
+	else	block +="0";
+	if (text != ""){
+		block +=PrintCode;		number = (char)(text.size()+ 0x20);
+		textBlock="6"+number+text;
+	}
+	else	block +="0";
+
+	block += codeBlock+textBlock;
 	this->sendMessage(block);
+	//this->sendMessage("0000");
+	this->sendMessage("0001");
+	//this->sendMessage("0002");
 }
 
+void TimPrinter::ejectCard(){
+	string block="";
+	//	Ex1 S? D9 T2 R? W1 P2
+		block += ExCode+AnyWhere+DstCode+Track+(string)"0"+(string)"0"+(string)"0";
+		this->sendMessage(block);
+}
 
 void TimPrinter::runListener(){
 	string input;
+	char car;
 	while(this->listener){
 		if (this->conector.WaitForBlock() != 0){
-			this->conector.Gets_Port(input);
-			push_Debug("runListener:: "+input);
+		//	this->conector.Gets_Port(input);
+		//	push_Debug("runListener:: "+input);
+			this->conector.Getc_Port(&car);
+			cout << car<< endl;
 			input ="";
 		}
 	}

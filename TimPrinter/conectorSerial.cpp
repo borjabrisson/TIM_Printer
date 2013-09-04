@@ -40,7 +40,7 @@ DCB conectorSerial::Get_Configure_Port() {
 	return oldtio;
 }
 
-DCB conectorSerial::Configure_Port(unsigned int BaudRate,char CharParity[]) {
+DCB conectorSerial::Configure_Port(unsigned int BaudRate, char CharParity[]) {
 	DCB newtio;
 	bzero(&newtio, sizeof(newtio)); //limpiamos struct para recibir los
 									//nuevos parámetros del puerto.
@@ -187,9 +187,10 @@ long conectorSerial::Gets_Port(string &Data, int SizeData) { // si la string no 
 	char item;
 	float tiempo, t;
 	long i;
-	bool infinite = false;
-	if (tcgetattr(this->fd, &newtio) != 0) return -1;
-	if (SizeData == -1){
+	bool endBlock=false,infinite = false;
+	if (tcgetattr(this->fd, &newtio) != 0)
+		return -1;
+	if (SizeData == -1) {
 		SizeData = 1;
 		infinite = true;
 	}
@@ -208,12 +209,22 @@ long conectorSerial::Gets_Port(string &Data, int SizeData) { // si la string no 
 			read(this->fd, &item, 1);
 
 		Data += item;
-		if (((Data[i] == 13) || (Data[i] == 3) || (Data[i] == 10)|| (Data[i] == 0)) && (i != 0)) {
+		/*if (((Data[i] == 13) || (Data[i] == 3) || (Data[i] == 10)
+				|| (Data[i] == 0)) && (i != 0)) {
 			i = SizeData;
 			break;
+		}*/
+		if (endBlock)
+			break;
+		if ((Data[i] == 3) && (i != 0)) {
+			endBlock = true;
 		}
+		if (((Data[i] == 4)||(Data[i] == 18)||(Data[i] == 16)) && (i != 0)) {
+					break;
+				}
 
-		if (infinite) SizeData++;
+		if (infinite)
+			SizeData++;
 	}
 	return i;
 }
@@ -370,53 +381,54 @@ int conectorSerial::Clean_Buffer() {
 }
 
 void conectorSerial::SERIAL_PORT_EVENT() {
-    string input="";
-       //Getc_Port(*hPort,c);
-     this->Gets_Port(input);
-     printf("[%d]=%s \n",this->fd,input.c_str()); 
-     input.clear();
+	string input = "";
+	//Getc_Port(*hPort,c);
+	this->Gets_Port(input);
+	printf("[%d]=%s \n", this->fd, input.c_str());
+	input.clear();
 }
 
-int conectorSerial::WaitForBlock(int time){
+int conectorSerial::WaitForBlock(int time) {
 	struct pollfd fds[1];
-	int ret=-1;
+	int ret = -1;
 
 	fds[0].fd = this->fd;
-    fds[0].events = POLLRDNORM | POLLIN;
+	fds[0].events = POLLRDNORM | POLLIN;
 	ret = poll(fds, 1, time);
-	if (ret < 0){ 
+	if (ret < 0) {
 		perror("Se ha producido un error");
 		exit(2);
 	}
-	if (ret >0){
+	if (ret > 0) {
 		return 1;
 	}
 	return 0;
 }
 
-void conectorSerial::Notify_Event(){
+void conectorSerial::Notify_Event() {
 	do {
-		if (this->WaitForBlock() != 0)this->SERIAL_PORT_EVENT();
+		if (this->WaitForBlock() != 0)
+			this->SERIAL_PORT_EVENT();
 	} while (TRUE);
 }
 void *conectorSerial::Handle_Thread(void *hPort) {
 	((conectorSerial *) hPort)->Notify_Event();
-	
+
 	return NULL;
 }
 
 pthread_t conectorSerial::Create_Thread_Port() {
 	cout << "entramos en Create_Thread_Port" << endl;
 	pthread_t idHilo;
-	pthread_create(&idHilo, NULL, &conectorSerial::Handle_Thread,  (void *)this);
+	pthread_create(&idHilo, NULL, &conectorSerial::Handle_Thread,
+			(void *) this);
 	return idHilo;
 }
 
-
-HANDLE conectorSerial::getFD(){
+HANDLE conectorSerial::getFD() {
 	return this->fd;
 }
 
-void conectorSerial::setFD(HANDLE fd){
+void conectorSerial::setFD(HANDLE fd) {
 	this->fd = fd;
 }

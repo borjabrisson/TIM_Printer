@@ -35,15 +35,23 @@ int main(int argc, char *argv[]) {
 	//conector.Open();
 	string input;
 	conector.Open("/dev/ttyS0");
+	//conector.Open();
 
 	//pruebaCMDList();
 	//pruebaAlarma();
 	conector.launchListener();
-	conector.writeCard("0123456","pppppppp");
+	//conector.sendMessage("169301151&ABCEDF2(012345676/ML ELECTRONIQUE");
+	//conector.sendMessage("139201242&1234566)PRUEBAS 2");
+
+	//cout << "CRC: "<< conector.calculateCRC("139201242&1234566)PRUEBAS 2\x03")<< endl;
+
+
+
+	conector.writeCard("6","","        23");
+	//conector.ejectCard();
 	cin >> input;
 
 	conector.Close(); // Cierro el puerto serie.
-
 	printf("\nHasta la proxima\n");
 	return 0;
 }
